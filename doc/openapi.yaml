@@ -1,0 +1,321 @@
+openapi: 3.0.3
+info:
+  title: air_tgbot HTTP API
+  description: HTTP-интерфейс служебного Telegram-бота Carpintero и webhook для пользовательских ботов.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Development
+
+tags:
+  - name: Service
+    description: Служебные операции Carpintero
+  - name: Bots
+    description: Управление пользовательскими Telegram-ботами
+  - name: Webhook
+    description: Работа с Telegram webhook
+  - name: Monitoring
+    description: Мониторинг сервиса
+
+paths:
+  /metrics:
+    get:
+      tags: [Monitoring]
+      summary: Получить Prometheus-метрики
+      operationId: getMetrics
+      responses:
+        '200':
+          description: Метрики Prometheus
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /tgbot/available:
+    get:
+      tags: [Service]
+      summary: Проверить доступность сервиса
+      operationId: checkAvailability
+      responses:
+        '200':
+          description: Сервис доступен
+
+  /tgbot/getname:
+    get:
+      tags: [Service]
+      summary: Получить имя пользовательского бота
+      operationId: getBotName
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Имя бота
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [bot_name]
+                properties:
+                  bot_name:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /tgbot/verification:
+    post:
+      tags: [Service]
+      summary: Отправить верификационное сообщение
+      operationId: sendVerification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DirectMessageRequest'
+      responses:
+        '200':
+          description: Сообщение обработано
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /tgbot/notification:
+    post:
+      tags: [Service]
+      summary: Отправить уведомление пользователю
+      operationId: sendNotification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+      responses:
+        '200':
+          description: Уведомление принято
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          description: Очередь уведомлений переполнена
+
+  /tgbot/adnot:
+    post:
+      tags: [Service]
+      summary: Отправить административное уведомление
+      operationId: sendAdminNotification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DirectMessageRequest'
+      responses:
+        '200':
+          description: Уведомление принято
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '503':
+          description: Очередь уведомлений переполнена
+
+  /tgbot/enable:
+    get:
+      tags: [Bots]
+      summary: Запустить пользовательского бота
+      operationId: enableBot
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Бот запущен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /tgbot/disable:
+    get:
+      tags: [Bots]
+      summary: Остановить пользовательского бота
+      operationId: disableBot
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Бот остановлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /tgbot/restart:
+    get:
+      tags: [Bots]
+      summary: Перезапустить пользовательского бота
+      operationId: restartBot
+      parameters:
+        - name: uid
+          in: query
+          required: true
+          description: ID пользователя
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+      responses:
+        '200':
+          description: Бот перезапущен или перезапуск выполняется
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /open/tgbot/setwebhook:
+    get:
+      tags: [Webhook]
+      summary: Установить webhook пользовательского бота
+      operationId: setBotWebhook
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Webhook установлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /open/tgbot/webhook/{token}:
+    post:
+      tags: [Webhook]
+      summary: Принять обновление Telegram webhook
+      operationId: processTelegramWebhook
+      parameters:
+        - name: token
+          in: path
+          required: true
+          description: Telegram Bot API token
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              description: Telegram Update
+      responses:
+        '200':
+          description: Обновление принято
+        '400':
+          description: Токен не указан
+        '404':
+          description: Бот с указанным токеном не найден или обновление не обработано
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  parameters:
+    UserId:
+      name: uid
+      in: query
+      required: true
+      description: ID пользователя, которому принадлежит бот
+      schema:
+        type: integer
+        format: int64
+        minimum: 0
+
+  schemas:
+    DirectMessageRequest:
+      type: object
+      required: [tid, msg]
+      properties:
+        tid:
+          type: integer
+          format: int64
+          description: Telegram ID получателя
+        msg:
+          type: string
+          description: Текст сообщения
+
+    NotificationRequest:
+      type: object
+      required: [tid, event]
+      properties:
+        lang:
+          type: string
+          description: Язык уведомления
+        tid:
+          type: integer
+          format: int64
+          description: Telegram ID получателя
+        event:
+          type: string
+          description: Событие уведомления
+        user:
+          type: string
+          description: Имя пользователя
+        assist:
+          type: string
+          description: Имя ассистента
+        target:
+          type: string
+          description: Целевое значение или описание цели
+
+    StatusResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Некорректный запрос
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    MethodNotAllowed:
+      description: HTTP-метод не поддерживается
+    InternalError:
+      description: Внутренняя ошибка сервиса
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
