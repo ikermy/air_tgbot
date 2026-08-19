@@ -762,7 +762,6 @@ func (b *Bot) initializeResponderSession(senderId int64, respName string, respId
 		return err
 	}
 
-	// TODO разобраться с этим хотя весь смысл в том как я сохраняю b.firstInteraction.Store(senderId, first)
 	// Отмечаем первое взаимодействие
 	first := true
 	if b.firstCache != nil {
