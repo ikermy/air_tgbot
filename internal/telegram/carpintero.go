@@ -100,7 +100,7 @@ func (c *Carpintero) Run() {
 
 	if webhookEnabled {
 		if err := configureWebhook(bot, c.token); err != nil {
-			logger.Fatalf("ошибка установки webhook: %w", err)
+			logger.Fatalf("ошибка установки webhook: %v", err)
 		}
 		bot.Poller = &tele.Webhook{}
 	} else {
@@ -194,7 +194,7 @@ func (c *Carpintero) SendMsg(ctx context.Context, recipient int64, messageBody s
 			if attempts < 3 && c.re429.MatchString(err.Error()) {
 				logger.Info("Failed to send message to Telegram: %s, retrying in %d seconds...", err, 2*attempts)
 
-				// Используем контекст для таймаута ожидания
+				// Используем контекст для тайм-аута ожидания
 				sleepCtx, sleepCancel := context.WithTimeout(ctx, time.Duration(2*attempts)*time.Second)
 				select {
 				case <-sleepCtx.Done():
@@ -216,7 +216,7 @@ func (c *Carpintero) SendMsg(ctx context.Context, recipient int64, messageBody s
 			return msg.ID, nil
 		}
 
-		// Используем контекст для таймаута ожидания между попытками
+		// Используем контекст для тайм-аута ожидания между попытками
 		sleepCtx, sleepCancel := context.WithTimeout(ctx, time.Duration(1*attempts)*time.Second)
 		select {
 		case <-sleepCtx.Done():

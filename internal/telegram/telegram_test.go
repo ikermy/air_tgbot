@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/ikermy/air_common/pkg/model"
-	"github.com/ikermy/air_common/pkg/model/create"
+	"github.com/ikermy/air_common/pkg/model/commdom"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	tele "gopkg.in/telebot.v4"
@@ -464,7 +464,7 @@ func TestDBMock_GetTgBotUsers(t *testing.T) {
 			TgBotEnabled: true,
 			AssistName:   "TestAssist",
 			AssistantId:  "assist_123",
-			Provider:     create.ProviderOpenAI,
+			Provider:     commdom.ProviderOpenAI,
 		},
 	}
 
@@ -489,7 +489,7 @@ func TestDBMock_GetTgBotUser(t *testing.T) {
 		TgBotEnabled: true,
 		AssistName:   "Assistant",
 		AssistantId:  "assist_456",
-		Provider:     create.ProviderMistral,
+		Provider:     commdom.ProviderMistral,
 	}
 
 	mockDB.On("GetTgBotUser", mock.Anything, uint32(456)).Return(user, nil)
@@ -499,7 +499,7 @@ func TestDBMock_GetTgBotUser(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, int64(456), result.UserId)
-	assert.Equal(t, create.ProviderMistral, result.Provider)
+	assert.Equal(t, commdom.ProviderMistral, result.Provider)
 	mockDB.AssertExpectations(t)
 }
 

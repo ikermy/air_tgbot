@@ -310,7 +310,11 @@ func (c *Carpintero) WebhookUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := c.t.ProcessWebhookUpdate(token, body); err != nil {
-		logger.Error("Ошибка обработки Webhook для токена %s: %v", token, err)
+		prefix := token
+		if len(token) > 12 {
+			prefix = token[:12]
+		}
+		logger.Error("Ошибка обработки Webhook для токена %s: %v", prefix, err)
 		w.WriteHeader(http.StatusNotFound)
 		_ = json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
 		return

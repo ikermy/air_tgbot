@@ -69,12 +69,12 @@ type DeltaProcessor interface {
 // rawAccumulated, displayText и messageDone теперь в библиотечном streamAccumulator.
 type streamState struct {
 	mu                sync.Mutex
-	placeholder       *tele.Message // отправленное placeholder-сообщение
-	lastDisplayedText string        // последний текст, отправленный в Telegram (для throttle)
-	lastEdit          time.Time     // время последнего bot.Edit (throttle)
+	placeholder       *tele.Message // Отправленное placeholder-сообщение
+	lastDisplayedText string        // Последний текст, отправленный в Telegram (для throttle)
+	lastEdit          time.Time     // Время последнего bot.Edit (throttle)
 }
 
-const streamEditThrottle = 100 * time.Millisecond // минимальный интервал между bot.Edit
+const streamEditThrottle = 100 * time.Millisecond // Минимальный интервал между bot.Edit
 
 type Bot struct {
 	ctx              context.Context
@@ -90,13 +90,13 @@ type Bot struct {
 	assist           *model.Assistant
 	userId           uint32         // ID пользователя-владельца бота
 	isTestBot        bool           // Флаг тестового бота (для unit/integration тестов)
-	firstInteraction sync.Map       // key: respId (int64), value: bool (true если это первое сообщение от респондента)
+	firstInteraction sync.Map       // Key: respId (int64), value: bool (true если это первое сообщение от респондента)
 	respIdentifiers  sync.Map       // key: respId (int64), value: string (идентификатор респондента для CRM)
-	firstCache       CacheMethods   // при первоначальной загрузке тащит первые контакты из redis
-	deltaMode        bool           // режим streamMsgs если включён в настройках бота
-	webhookMode      bool           // режим webhook если включён в настройках бота
-	streamMsgs       sync.Map       // key: respId (int64), value: *streamState
-	deltaProcessor   DeltaProcessor // внедрённый ProcessStreamDelta из startpoint.Start
+	firstCache       CacheMethods   // При первоначальной загрузке тащит первые контакты из redis
+	deltaMode        bool           // Режим streamMsgs если включён в настройках бота
+	webhookMode      bool           // Режим webhook если включён в настройках бота
+	streamMsgs       sync.Map       // Key: respId (int64), value: *streamState
+	deltaProcessor   DeltaProcessor // Внедрённый ProcessStreamDelta из startpoint.Start
 }
 
 type User struct {
@@ -110,13 +110,13 @@ type User struct {
 	rpc                  ORCClient
 	firstCache           CacheMethods
 	bot                  map[uint32]*Bot
-	botByToken           map[string]*Bot // для быстрого поиска бота по токену в режиме webhook
-	operatorModeByDialog sync.Map        // key: dialogId (uint64), value: bool
+	botByToken           map[string]*Bot // Для быстрого поиска бота по токену в режиме webhook
+	operatorModeByDialog sync.Map        // Key: dialogId (uint64), value: bool
 	op                   Operator
 	deltaProcessor       DeltaProcessor // ProcessStreamDelta из startpoint.Start
 
-	// колбэк для проброса входящих сообщений в вызывающий слой
-	onIncoming func(userID uint32, dialogID uint64) error
+	// Колбэк для проброса входящих сообщений в вызывающий слой
+	// onIncoming func(userID uint32, dialogID uint64) error
 }
 
 // SetDeltaProcessor внедряет DeltaProcessor (startpoint.Start) для использования
@@ -167,7 +167,7 @@ func (u *User) StopBot() {
 		return
 	}
 
-	// Останавливаем боты параллельно с таймаутом
+	// Останавливаем боты параллельно с тайм-аутом
 	var wg sync.WaitGroup
 	for _, b := range bots {
 		wg.Add(1)
@@ -186,7 +186,7 @@ func (u *User) StopBot() {
 				close(done)
 			}()
 
-			// Ждём остановки с таймаутом 2 секунды
+			// Ждём остановки с тайм-аутом 2 секунды
 			select {
 			case <-done:
 				logger.Info("Бот %s успешно остановлен", bot.Me.Username)
@@ -971,7 +971,7 @@ func (b *Bot) handleFirstInteraction(sender *tele.User, senderName string) bool 
 	}
 
 	// nil для тестовых вызовов
-	if first && b.assist.Events.Start && b.end != nil {
+	if b.assist.Events.Start && b.end != nil {
 		notifyMsg := com.CarpCh{
 			Event:      "start",
 			UserName:   senderName,
@@ -1037,7 +1037,7 @@ func (b *Bot) sendToModel(usrCh *model.Ch, msg model.Message, senderId int64, se
 	}
 }
 
-// trySendToRxCh пытается отправить сообщение в RxCh с таймаутом.
+// trySendToRxCh пытается отправить сообщение в RxCh с тайм-аутом.
 func (u *User) trySendToRxCh(usrCh *model.Ch, msg model.Message) error {
 	if err := usrCh.SendToRx(msg); err != nil {
 		return fmt.Errorf("не удалось отправить сообщение в RxCh: %w", err)
@@ -1534,7 +1534,7 @@ func formatSender(sender *tele.User) string {
 func (u *User) SendSubscriptionError(error *com.SubscriptionError) {
 	// Выключаю все каналы пользователя
 	if dbErr := u.db.DisableAllUserChannel(error.UserID); dbErr != nil {
-		logger.Error("Ошибка при выключении каналов пользвателя %d: %v", error.UserID, dbErr)
+		logger.Error("Ошибка при выключении каналов: %v", dbErr, error.UserID)
 	}
 
 	// Создаю сообщение об окончании подписки
@@ -1609,7 +1609,7 @@ func (b *Bot) extractFilesFromMessage(c tele.Context) ([]model.FileUpload, error
 		files = append(files, fileUpload)
 	}
 
-	// Обработка видеосообщений
+	// Обработка видео сообщений
 	if message.VideoNote != nil {
 		fileUpload, err := b.telegramFileToFileUpload(c, message.VideoNote.File, "videonote.mp4", "video/mp4")
 		if err != nil {
@@ -1766,8 +1766,12 @@ func (u *User) ProcessWebhookUpdate(token string, body []byte) error {
 	bot, ok := u.botByToken[token]
 	u.mu.RUnlock()
 
+	prefix := token
+	if len(token) > 12 {
+		prefix = token[:12]
+	}
 	if !ok || bot == nil || bot.bot == nil {
-		return fmt.Errorf("бот с токеном %s не найден", token)
+		return fmt.Errorf("бот с токеном %s не найден", prefix)
 	}
 
 	logger.Debug("Processing Webhook update for bot %s", bot.bot.Me.Username)

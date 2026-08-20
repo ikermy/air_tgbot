@@ -10,12 +10,12 @@ import (
 )
 
 // detectAndPrepareText определяет формат текста и подготавливает его для отправки
-// Выполняет все стадии подготовки:
+// выполняет все стадии подготовки:
 // 1. Удаление markdown code blocks (```json ... ```)
 // 2. Нормализация переносов строк и табуляций
 // 3. Определение формата (HTML/MarkdownV2/Markdown/Plain)
 // 4. Экранирование специальных символов при необходимости
-// Возвращает подготовленный текст и режим отправки
+// возвращает подготовленный текст и режим отправки
 func detectAndPrepareText(text string) (string, *tele.SendOptions) {
 	// Стадия 1: Удаляем лишние пробелы
 	text = strings.TrimSpace(text)
@@ -25,7 +25,7 @@ func detectAndPrepareText(text string) (string, *tele.SendOptions) {
 	}
 
 	// Стадия 2: Удаляем markdown code blocks (```json ... ```, ```text ... ```)
-	// Регулярка для поиска блоков типа ```язык\nкод\n```
+	// Регулярка для поиска блоков типа ```язык\nКОД\n```
 	codeBlockPattern := regexp.MustCompile("(?s)```[a-z]*\\s*\\n(.+?)\\n```")
 	if codeBlockPattern.MatchString(text) {
 		// Извлекаем содержимое из code block
@@ -41,7 +41,7 @@ func detectAndPrepareText(text string) (string, *tele.SendOptions) {
 	}
 
 	// Стадия 3: Нормализация переносов строк и табуляций
-	// Заменяем \r\n на \n
+	// заменяем \r\n на \n
 	text = strings.ReplaceAll(text, "\r\n", "\n")
 	text = strings.ReplaceAll(text, `\n`, "\n")
 	text = strings.ReplaceAll(text, `\t`, "\t")
@@ -148,7 +148,7 @@ func isValidTelegramMarkdownV2(text string) bool {
 }
 
 // escapeMarkdownV2Full полностью экранирует ВСЕ специальные символы для MarkdownV2
-// Используется когда нужно отправить текст БЕЗ форматирования
+// используется когда нужно отправить текст БЕЗ форматирования
 func escapeMarkdownV2Full(text string) string {
 	specialChars := []string{
 		"_", "*", "[", "]", "(", ")", "~", "`",

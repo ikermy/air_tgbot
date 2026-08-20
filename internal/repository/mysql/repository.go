@@ -16,6 +16,8 @@ import (
 	"github.com/ikermy/air_logger/v2/pkg/logger"
 )
 
+//// Обязательные методы ////
+
 // NullBytes промежуточный тип для загрузки массива байт из базы
 type NullBytes struct {
 	Bytes []byte
@@ -52,6 +54,8 @@ func (nb NullBytes) Value() (driver.Value, error) {
 
 	return nb.Bytes, nil
 }
+
+/////////////////////////////
 
 // Implementation реализация интерфейса Implementation для MySQL
 type Implementation struct {
@@ -94,13 +98,13 @@ func populateUserDetails(user *domain.UserDetails, Name, assistantId sql.NullStr
 
 	// Распаковываем и обрабатываем data если она существует
 	if data.Valid {
-		mdata, err := create.DecompressModelData(data.Bytes)
+		modelData, err := create.DecompressModelData(data.Bytes)
 		if err == nil {
-			user.MetaAction = mdata.MetaAction
-			user.Triggers = mdata.Triggers
-			user.AskLimit = uint32(mdata.Espero.Limit)
-			user.Espero = mdata.Espero.Wait
-			user.Ignore = mdata.Espero.Ignore
+			user.MetaAction = modelData.MetaAction
+			user.Triggers = modelData.Triggers
+			user.AskLimit = uint32(modelData.Espero.Limit)
+			user.Espero = modelData.Espero.Wait
+			user.Ignore = modelData.Espero.Ignore
 		}
 	}
 

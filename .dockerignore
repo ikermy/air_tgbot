@@ -22,7 +22,6 @@ vendor/
 *.zip
 *.7z
 .github/
-.service_key
 .service_key.*
 
 

@@ -76,7 +76,7 @@ func New(parent context.Context) *App {
 
 	rpcClient, err := rpc.New()
 	if err != nil {
-		logger.Fatalf("ошибка создания rpc клиента: %w", err)
+		logger.Fatalf("ошибка создания rpc клиента: %v", err)
 	}
 
 	m := model.NewModelRouter(ctx, d,
@@ -188,7 +188,7 @@ func (a *App) Run() {
 	// Обработка сигнала завершения
 	go func() {
 		<-a.ctx.Done()
-		// Аварийный таймаут на случай, если что-то пойдет не так с завершением
+		// Аварийный тайм-аут на случай, если что-то пойдет не так с завершением
 		go func() {
 			ticker := time.NewTicker(5 * time.Second)
 			<-ticker.C
