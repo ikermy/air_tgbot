@@ -3,7 +3,7 @@ package app
 import (
 	"air_tgbot/internal/db"
 	"air_tgbot/internal/domain"
-	telegram2 "air_tgbot/internal/telegram"
+	"air_tgbot/internal/telegram"
 	"context"
 	"time"
 
@@ -117,7 +117,7 @@ func New(parent context.Context) *App {
 
 	e := endpoint.New(ctx, d)
 	cr := crm.New(ctx, crm.WithAltContactChannel(crm.ChannelTelegram))
-	t := telegram2.New(ctx, d, m, e, cr, rpcClient, redisClient)
+	t := telegram.New(ctx, d, m, e, cr, rpcClient, redisClient)
 	o := operator.New(ctx)
 
 	// Получаем конфигурацию Telegram-бота через универсальный orc клиент
@@ -127,7 +127,7 @@ func New(parent context.Context) *App {
 		botConfig = nil
 	}
 	// Создаём Carpintero бота с конфигурацией из gRPC если она получена
-	c := telegram2.NewCarpintero(ctx, botConfig, d, t)
+	c := telegram.NewCarpintero(ctx, botConfig, d, t)
 
 	s := startpoint.New(ctx, m, e, t, o)
 
@@ -150,7 +150,7 @@ func New(parent context.Context) *App {
 func (a *App) Run() {
 	readyCh := make(chan string)
 	// Сначала запускаю бота Carpintero
-	carpintero := a.Carp.(*telegram2.Carpintero)
+	carpintero := a.Carp.(*telegram.Carpintero)
 	carpintero.SetReadyChannel(readyCh)
 
 	// Создаю шину для логирования сообщений от модулей
@@ -229,7 +229,7 @@ func (a *App) Starter() {
 	}()
 
 	// Простой цикл чтения из канала
-	for start := range telegram2.StartCh {
+	for start := range telegram.StartCh {
 		// Запускаю слушателя с пользовательскими данными
 		go func(startData model.StartCh) {
 			a.Start.StarterListener(startData, errCh)

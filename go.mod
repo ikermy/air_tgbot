@@ -3,7 +3,7 @@ module air_tgbot
 go 1.25.8
 
 require (
-	github.com/ikermy/air_common v1.50.91
+	github.com/ikermy/air_common v1.50.92
 	github.com/ikermy/air_logger/v2 v2.1.3
 	github.com/prometheus/client_golang v1.24.1
 	github.com/redis/go-redis/v9 v9.22.0
