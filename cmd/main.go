@@ -22,8 +22,15 @@ func main() {
 	// Все значения имеют разумные дефолты; некорректные критичные — fatal.
 	mode.InitFromEnv(logger.Fatalf)
 
-	// mode.RealHost всегда должен быть в https режиме для корректной работы Webhook
-	mode.SetRealHost("https://" + strings.TrimPrefix(strings.TrimPrefix(mode.GetRealHost(), "https://"), "http://"))
+	// Для webhook используем публичный адрес из REAL_URL.
+	// mode.InitFromEnv уже загружает его, но читаем переменную явно, чтобы
+	// источник адреса был очевиден в production-конфигурации.
+	realHost := os.Getenv("REAL_URL")
+	if realHost == "" {
+		realHost = mode.GetRealHost()
+	}
+	realHost = strings.TrimPrefix(strings.TrimPrefix(realHost, "https://"), "http://")
+	mode.SetRealHost("https://" + realHost)
 	logger.Infoln("USE REAL_URL:", mode.GetRealHost())
 
 	mode.SetTextMode(true)

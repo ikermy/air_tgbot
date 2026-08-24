@@ -1,7 +1,7 @@
 package http
 
 import (
-	metrics2 "air_tgbot/internal/metrics"
+	metrics "air_tgbot/internal/metrics"
 	stdhttp "net/http"
 
 	"github.com/ikermy/air_logger/v2/pkg/logger"
@@ -18,18 +18,18 @@ type Handlers struct {
 func Run(h Handlers) {
 	logger.Info("Запуск сервера уведомлений Carpintero")
 	mux := stdhttp.NewServeMux()
-	mux.Handle("/metrics", metrics2.Handler())
+	mux.Handle("/metrics", metrics.Handler())
 
-	mux.Handle("/tgbot/available", metrics2.HTTPMiddleware("/available", enableCORS(h.Available)))
-	mux.Handle("/tgbot/getname", metrics2.HTTPMiddleware("/getname", enableCORS(h.GetName)))
-	mux.Handle("/tgbot/notification", metrics2.HTTPMiddleware("/notification", enableCORS(h.Notification)))
-	mux.Handle("/tgbot/verification", metrics2.HTTPMiddleware("/verification", enableCORS(h.Verification)))
-	mux.Handle("/tgbot/adnot", metrics2.HTTPMiddleware("/adnot", enableCORS(h.AdminNotification)))
-	mux.Handle("/tgbot/enable", metrics2.HTTPMiddleware("/enable", enableCORS(h.Enable)))
-	mux.Handle("/tgbot/disable", metrics2.HTTPMiddleware("/disable", enableCORS(h.Disable)))
-	mux.Handle("/tgbot/restart", metrics2.HTTPMiddleware("/restart", enableCORS(h.Restart)))
-	mux.Handle("/open/tgbot/setwebhook", metrics2.HTTPMiddleware("/setwebhook", enableCORS(h.SetWebhook)))
-	mux.Handle("POST /open/tgbot/webhook/{token}", metrics2.HTTPMiddleware("/webhook", h.Webhook))
+	mux.Handle("/tgbot/available", metrics.HTTPMiddleware("/available", enableCORS(h.Available)))
+	mux.Handle("/tgbot/getname", metrics.HTTPMiddleware("/getname", enableCORS(h.GetName)))
+	mux.Handle("/tgbot/notification", metrics.HTTPMiddleware("/notification", enableCORS(h.Notification)))
+	mux.Handle("/tgbot/verification", metrics.HTTPMiddleware("/verification", enableCORS(h.Verification)))
+	mux.Handle("/tgbot/adnot", metrics.HTTPMiddleware("/adnot", enableCORS(h.AdminNotification)))
+	mux.Handle("/tgbot/enable", metrics.HTTPMiddleware("/enable", enableCORS(h.Enable)))
+	mux.Handle("/tgbot/disable", metrics.HTTPMiddleware("/disable", enableCORS(h.Disable)))
+	mux.Handle("/tgbot/restart", metrics.HTTPMiddleware("/restart", enableCORS(h.Restart)))
+	mux.Handle("/open/tgbot/setwebhook", metrics.HTTPMiddleware("/setwebhook", enableCORS(h.SetWebhook)))
+	mux.Handle("POST /open/tgbot/webhook/{token}", metrics.HTTPMiddleware("/webhook", h.Webhook))
 
 	if err := stdhttp.ListenAndServe(":8080", mux); err != nil {
 		logger.Fatalf("ошибка запуска сервера уведомлений: %v", err)

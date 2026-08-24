@@ -115,7 +115,7 @@ jobs:
             chmod 600 .service_key
             
             # 1. Create .env file for Docker Compose
-            echo "DOMAIN=${{ secrets.HOST }}" > .env
+            echo "DOMAIN=kermy.org" > .env
             echo "DB_USER=${{ secrets.DB_USER }}" >> .env
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
             chmod 600 .env
