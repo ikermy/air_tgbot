@@ -10,6 +10,7 @@ import (
 
 	"github.com/ikermy/air_common/pkg/endpoint"
 	"github.com/ikermy/air_logger/v2/pkg/logger"
+	tele "gopkg.in/telebot.v4"
 )
 
 func (c *Carpintero) AvailableHandler(w http.ResponseWriter, _ *http.Request) {
@@ -310,6 +311,20 @@ func (c *Carpintero) WebhookUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := c.t.ProcessWebhookUpdate(token, body); err != nil {
+		// Carpintero использует собственный webhook. Пользовательские боты
+		// обрабатываются через User.ProcessWebhookUpdate, но update Carpintero
+		// должен попасть в telebot.Bot, иначе его handlers (включая /start)
+		// никогда не вызываются.
+		if token == c.token && c.b != nil {
+			var update tele.Update
+			if err := json.Unmarshal(body, &update); err != nil {
+				http.Error(w, "invalid telegram update", http.StatusBadRequest)
+				return
+			}
+			c.b.ProcessUpdate(update)
+			w.WriteHeader(http.StatusOK)
+			return
+		}
 		prefix := token
 		if len(token) > 12 {
 			prefix = token[:12]
