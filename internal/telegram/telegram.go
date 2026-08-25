@@ -12,15 +12,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ikermy/air_common/pkg/com"
-	"github.com/ikermy/air_common/pkg/comdb"
-	"github.com/ikermy/air_common/pkg/crm"
-	"github.com/ikermy/air_common/pkg/crypto"
-	"github.com/ikermy/air_common/pkg/endpoint"
-	"github.com/ikermy/air_common/pkg/mode"
-	"github.com/ikermy/air_common/pkg/model"
-	"github.com/ikermy/air_common/pkg/operator"
-	"github.com/ikermy/air_logger/v2/pkg/logger"
+	"github.com/ikermy/air-common/pkg/com"
+	"github.com/ikermy/air-common/pkg/comdb"
+	"github.com/ikermy/air-common/pkg/comdom"
+	"github.com/ikermy/air-common/pkg/crm"
+	"github.com/ikermy/air-common/pkg/crypto"
+	"github.com/ikermy/air-common/pkg/endpoint"
+	"github.com/ikermy/air-common/pkg/mode"
+	"github.com/ikermy/air-common/pkg/model"
+	"github.com/ikermy/air-common/pkg/operator"
+	"github.com/ikermy/air-logger/v2/pkg/logger"
 	"github.com/redis/go-redis/v9"
 	tele "gopkg.in/telebot.v4"
 )
@@ -58,7 +59,7 @@ type ExtDB = comdb.Exterior
 type CRM = crm.Inter
 
 // DeltaProcessor — интерфейс для обработки стриминговых дельт.
-// Реализуется startpoint.Start (AiR_Common v1.50.33+).
+// Реализуется startpoint.Start (air-common v1.50.33+).
 type DeltaProcessor interface {
 	ProcessStreamDelta(respId uint64, rawChunk string) (model.StreamDeltaResult, error)
 	GetStreamDisplayText(respId uint64) string
@@ -628,7 +629,7 @@ func (u *User) initializeBot(userID uint32, token string, delta, webhook bool, a
 // ensureResponderSession пересоздаёт модель, каналы и слушателя ответа.
 func (b *Bot) ensureResponderSession(telegramID int64, senderName string) (*model.Ch, error) {
 	// Получаем/создаём диалог
-	dialogId, err := b.db.GetOrSetTreadAndResponder(b.userId, uint64(telegramID), senderName, comdb.TelegramBot)
+	dialogId, err := b.db.GetOrSetTreadAndResponder(b.userId, uint64(telegramID), senderName, comdom.TelegramBot)
 	if err != nil {
 		return nil, fmt.Errorf("GetOrSetTreadAndResponder: %w", err)
 	}
@@ -740,7 +741,7 @@ func (b *Bot) sessionInitMiddleware() func(next tele.HandlerFunc) tele.HandlerFu
 func (b *Bot) initializeResponderSession(senderId int64, respName string, respId uint64, respIdentifier string) error {
 	startedAt := time.Now()
 	// Получаем ID диалога
-	dialogId, err := b.db.GetOrSetTreadAndResponder(b.userId, respId, respName, comdb.TelegramBot)
+	dialogId, err := b.db.GetOrSetTreadAndResponder(b.userId, respId, respName, comdom.TelegramBot)
 	if err != nil {
 		metrics.ObserveUserChannelInit(b.userId, "dialog_error", startedAt)
 		return fmt.Errorf("ошибка при создании диалога: %w", err)
@@ -1196,7 +1197,7 @@ func (b *Bot) processAssistantResponse(dialogId uint64, respId int64, msg model.
 }
 
 // handleDeltaMessage обрабатывает дельта-сообщение от стриминга ассистента.
-// Использует библиотечный ProcessStreamDelta (AiR_Common v1.50.33+) вместо
+// Использует библиотечный ProcessStreamDelta (air-common v1.50.33+) вместо
 // локального extractStreamText. JSON-события (function calls, token_usage и т.п.)
 // корректно детектятся библиотекой и пропускаются (Kind == StreamDeltaKindEvent).
 func (b *Bot) handleDeltaMessage(respId int64, rawChunk string) {

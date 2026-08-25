@@ -6,8 +6,8 @@ import (
 	"air_tgbot/internal/repository/mysql"
 	"context"
 
-	"github.com/ikermy/air_common/pkg/comdb"
-	"github.com/ikermy/air_logger/v2/pkg/logger"
+	"github.com/ikermy/air-common/pkg/comdb"
+	"github.com/ikermy/air-logger/v2/pkg/logger"
 )
 
 // DB обёртка соединения с базой данных и репозиториями

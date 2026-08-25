@@ -1,6 +1,6 @@
 # AiR_Tgbot
 
-![air_tgbot](air_tgbot_logo.png)
+![air_tgbot](logo.png)
 
 [🇷🇺 Russian version](README.ru.md)
 
@@ -121,16 +121,16 @@ The Dockerfile builds a static Go binary and places it in a minimal `scratch`-ba
 
 ## Related Services
 
-- [air_common](https://github.com/ikermy/air_common) — shared library for AI microservices;
+- [air-common](https://github.com/ikermy/air-common) — shared library for AI microservices;
 - [air_orchestrator](https://github.com/ikermy/air_orchestrator) — main orchestration service;
 - [air_operator](https://github.com/ikermy/air_operator) — service for forwarding AI responses to and from operators across bot types;
 - [marusia_crm](https://github.com/ikermy/marusia_crm) — integration service for external CRM systems;
-- [air_logger](https://github.com/ikermy/air_logger) — event logging service with multi-user and Loki collector support.
+- [air-logger](https://github.com/ikermy/air-logger) — event logging service with multi-user and Loki collector support.
 
 
 ## Related Components
 
-- [`air_common`](https://github.com/ikermy/air_common) — shared models, AI router, database, and RPC components;
+- [`air-common`](https://github.com/ikermy/air-common) — shared models, AI router, database, and RPC components;
 - `AiR_ORCHESTRATOR` — bot configuration and master keys;
 - MySQL — user, assistant, and Telegram bot settings;
 - Redis — temporary distributed state;

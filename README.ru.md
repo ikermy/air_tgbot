@@ -1,6 +1,6 @@
 # AiR_Tgbot
 
-![air_tgbot](air_tgbot_logo.png)
+![air_tgbot](logo.png)
 
 [🇬🇧 English version](README.md)
 
@@ -120,11 +120,11 @@ Production-конфигурация находится в [`prod.yml`](prod.yml)
 Dockerfile собирает статический Go-бинарник и помещает его в минимальный runtime-образ на базе `scratch`.
 
 ## Связанные сервисы
-- [air_common](https://github.com/ikermy/air_common) — Общая библиотека для AI‑микросервисов
+- [air-common](https://github.com/ikermy/air-common) — Общая библиотека для AI‑микросервисов
 - [air_orchestrator](https://github.com/ikermy/air_orchestrator) — Главный сервис оркестратор
 - [air_operator](https://github.com/ikermy/air_operator) — Сервис переадресации ответов на операторов от пользователей, поддерживает все типы ботов
 - [marusia_crm](https://github.com/ikermy/marusia_crm) — Сервис интеграции с внешними CRM системами
-- [air_logger](https://github.com/ikermy/air_logger) — Вспомогательный сервис логирования событий с поддержкой многопользовательского режима и поддержкой сборщика логов loki
+- [air-logger](https://github.com/ikermy/air-logger) — Вспомогательный сервис логирования событий с поддержкой многопользовательского режима и поддержкой сборщика логов loki
 
 ## Лицензия
 

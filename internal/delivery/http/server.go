@@ -4,7 +4,7 @@ import (
 	metrics "air_tgbot/internal/metrics"
 	stdhttp "net/http"
 
-	"github.com/ikermy/air_logger/v2/pkg/logger"
+	"github.com/ikermy/air-logger/v2/pkg/logger"
 )
 
 // Handlers contains the HTTP endpoints exposed by the notification server.

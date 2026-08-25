@@ -9,11 +9,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ikermy/air_common/pkg/comdb"
-	"github.com/ikermy/air_common/pkg/mode"
-	"github.com/ikermy/air_common/pkg/model/commdom"
-	"github.com/ikermy/air_common/pkg/model/create"
-	"github.com/ikermy/air_logger/v2/pkg/logger"
+	"github.com/ikermy/air-common/pkg/comdb"
+	"github.com/ikermy/air-common/pkg/comdom"
+	"github.com/ikermy/air-common/pkg/mode"
+	"github.com/ikermy/air-common/pkg/model/create"
+	"github.com/ikermy/air-logger/v2/pkg/logger"
 )
 
 //// Обязательные методы ////
@@ -91,9 +91,9 @@ func populateUserDetails(user *domain.UserDetails, Name, assistantId sql.NullStr
 
 	// Обработка информации о провайдере
 	if provider.Valid {
-		user.Provider = commdom.ProviderType(provider.Byte)
+		user.Provider = comdom.ProviderType(provider.Byte)
 	} else {
-		user.Provider = commdom.ProviderOpenAI // 1 = OpenAI по умолчанию
+		user.Provider = comdom.ProviderOpenAI // 1 = OpenAI по умолчанию
 	}
 
 	// Распаковываем и обрабатываем data если она существует

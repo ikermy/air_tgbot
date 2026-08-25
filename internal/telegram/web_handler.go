@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ikermy/air_common/pkg/endpoint"
-	"github.com/ikermy/air_logger/v2/pkg/logger"
+	"github.com/ikermy/air-common/pkg/endpoint"
+	"github.com/ikermy/air-logger/v2/pkg/logger"
 	tele "gopkg.in/telebot.v4"
 )
 
@@ -302,6 +302,7 @@ func (c *Carpintero) WebhookUpdate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "token is required", http.StatusBadRequest)
 		return
 	}
+	logger.Info("Carpintero webhook: получен update, bot=%s, payload=%d bytes", c.botName, r.ContentLength)
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -322,6 +323,7 @@ func (c *Carpintero) WebhookUpdate(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			c.b.ProcessUpdate(update)
+			logger.Info("Carpintero webhook: update передан в Carpintero bot=%s", c.botName)
 			w.WriteHeader(http.StatusOK)
 			return
 		}

@@ -12,9 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ikermy/air_common/pkg/mode"
-	"github.com/ikermy/air_common/pkg/rpc/proto"
-	"github.com/ikermy/air_logger/v2/pkg/logger"
+	"github.com/ikermy/air-common/pkg/mode"
+	"github.com/ikermy/air-common/pkg/rpc/proto"
+	"github.com/ikermy/air-logger/v2/pkg/logger"
 	tele "gopkg.in/telebot.v4"
 )
 
@@ -78,15 +78,16 @@ func (c *Carpintero) Run() {
 
 	// Проверяю что токен бота задан
 	if c.token == "" {
+		logger.Error("Carpintero: токен не задан, запуск остановлен")
 		c.botReady <- "Токен бота не задан в конфигурации, Carpintero не запущен"
 		return
 	}
-
 	// Для production включаю в режиме webhook
 	webhookEnabled, err := strconv.ParseBool(os.Getenv("WEBHOOK"))
 	if err != nil {
 		webhookEnabled = false
 	}
+	logger.Info("Carpintero: создаю Telegram-клиент, режим webhook=%t, bot=%s", webhookEnabled, c.botName)
 
 	poller := &tele.LongPoller{Timeout: 30 * time.Second}
 
@@ -99,13 +100,16 @@ func (c *Carpintero) Run() {
 	}
 
 	if webhookEnabled {
+		logger.Info("Carpintero: устанавливаю webhook для bot=%s на %s/open/tgbot/webhook/<token>", c.botName, mode.GetRealHost())
 		if err := configureWebhook(bot, c.token); err != nil {
-			logger.Fatalf("ошибка установки webhook: %v", err)
+			logger.Fatalf("Carpintero: ошибка установки webhook для bot=%s: %v", c.botName, err)
 		}
+		logger.Info("Carpintero: webhook успешно установлен для bot=%s", c.botName)
 		bot.Poller = &tele.Webhook{}
 	} else {
+		logger.Info("Carpintero: webhook отключён, удаляю webhook и запускаю polling для bot=%s", c.botName)
 		if err := bot.RemoveWebhook(true); err != nil {
-			logger.Fatalf("ошибка удаления webhook: %v", err)
+			logger.Fatalf("Carpintero: ошибка удаления webhook для bot=%s: %v", c.botName, err)
 		}
 	}
 
@@ -123,6 +127,7 @@ func (c *Carpintero) Run() {
 	// Запускаю слушателя сообщений для отправки уведомлений
 	go c.Listener()
 
+	logger.Info("Carpintero: запускаю telebot для bot=%s, poller=%T", c.botName, c.b.Poller)
 	c.b.Start()
 }
 
