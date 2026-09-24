@@ -5,15 +5,22 @@ import (
 	"air_tgbot/internal/repository"
 	"air_tgbot/internal/repository/mysql"
 	"context"
+	"sync"
 
 	"github.com/ikermy/air-common/pkg/comdb"
 	"github.com/ikermy/air-logger/v2/pkg/logger"
+
+	_ "github.com/go-sql-driver/mysql" // регистрация драйвера "mysql" для database/sql
 )
 
 // DB обёртка соединения с базой данных и репозиториями
 type DB struct {
 	*comdb.DB
 	repo repository.Repository
+
+	done   sync.Once     // На всякий случай однократное закрытие канала
+	DoneCh chan struct{} // Канал уведомления о завершении операций пользователями ДБ
+	Exit   chan struct{} // Канал завершения работы приложения
 }
 
 // New создаёт подключение к БД и инициализирует репозитории
@@ -27,8 +34,10 @@ func New(parent context.Context) (*DB, error) {
 		return nil, err
 	}
 	return &DB{
-		DB:   base,
-		repo: repo,
+		DB:     base,
+		repo:   repo,
+		DoneCh: make(chan struct{}),
+		Exit:   make(chan struct{}),
 	}, nil
 }
 
@@ -52,11 +61,21 @@ func (d *DB) HandlerClose() {
 	go func() {
 		<-d.MainCTX().Done()
 		logger.Info("DB: контекст отменен, ожидаю завершения всех операций...")
-		<-domain.UsersDB
+		<-d.DoneCh
 		logger.Info("DB: все модули завершили работу, закрываю соединение...")
 		if err := d.Close(); err != nil {
 			logger.Error("DB: ошибка при закрытии: %v", err)
 		}
-		close(domain.Exit)
+		close(d.Exit)
 	}()
+}
+
+func (d *DB) CloseDoneCh() {
+	d.done.Do(func() {
+		close(d.DoneCh)
+	})
+}
+
+func (d *DB) GetExitCh() <-chan struct{} {
+	return d.Exit
 }

@@ -55,8 +55,6 @@ func (nb NullBytes) Value() (driver.Value, error) {
 	return nb.Bytes, nil
 }
 
-/////////////////////////////
-
 // Implementation реализация интерфейса Implementation для MySQL
 type Implementation struct {
 	db *comdb.DB

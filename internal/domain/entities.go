@@ -26,3 +26,16 @@ type Notifications struct {
 	End    bool
 	Target bool
 }
+
+// Redis — параметры подключения (заполняются в main.go из env).
+type Redis struct {
+	RedisAddr     string // REDIS_ADDR (default: "" — Redis отключён)
+	RedisPassword string // REDIS_PASSWORD
+	RedisDB       int    // REDIS_DB (default: 0)
+}
+
+// CarpCh - канал для передачи уведомлений
+type CarpCh struct {
+	TelegaID int64
+	Message  string
+}

@@ -648,11 +648,12 @@ func (b *Bot) ensureResponderSession(telegramID int64, senderName string) (*mode
 
 	// Стартуем слушателя (если прежний завершился, это безопасно)
 	start := model.StartCh{
-		Ctx:     b.ctx,
-		Model:   usrMod,
-		Chanel:  usrCh,
-		TreadId: dialogId,
-		RespId:  uint64(telegramID),
+		Ctx:      b.ctx,
+		ChName:   comdom.TelegramBot,
+		Model:    usrMod,
+		Channel:  usrCh,
+		ThreadId: dialogId,
+		RespId:   uint64(telegramID),
 	}
 
 	logger.Debug("ensureResponderSession: отправка startCh для respId=%d, dialogId=%d", uint64(telegramID), dialogId, b.userId)
@@ -782,11 +783,12 @@ func (b *Bot) initializeResponderSession(senderId int64, respName string, respId
 
 	// Отправляем данные в канал запуска
 	startCh := model.StartCh{
-		Ctx:     b.ctx,
-		Model:   usrMod,
-		Chanel:  usrCh,
-		TreadId: dialogId,
-		RespId:  respId,
+		Ctx:      b.ctx,
+		ChName:   comdom.TelegramBot,
+		Model:    usrMod,
+		Channel:  usrCh,
+		ThreadId: dialogId,
+		RespId:   respId,
 	}
 
 	select {

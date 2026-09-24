@@ -4,7 +4,7 @@
 
 [🇷🇺 Russian version](README.ru.md)
 
-![Go version](https://img.shields.io/badge/Go-1.25.8-00ADD8?logo=go)
+![Go version](https://img.shields.io/badge/Go-1.26-00ADD8?logo=go)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 [![Telegram](https://img.shields.io/badge/Telegram-Join%20Chat-blue?logo=telegram)](https://t.me/marusia_dev)
 
