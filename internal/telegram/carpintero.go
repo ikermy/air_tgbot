@@ -21,16 +21,17 @@ import (
 type Telega = Inter
 
 type Carpintero struct {
-	ctx      context.Context
-	cancel   context.CancelFunc
-	b        *tele.Bot
-	token    string
-	botName  string
-	botID    string
-	botReady chan string    // Канал для уведомления о готовности бота
-	re429    *regexp.Regexp // Ошибка 429 ТГ лимит отправки сообщений
-	db       DB
-	t        Telega
+	ctx          context.Context
+	cancel       context.CancelFunc
+	b            *tele.Bot
+	token        string
+	botName      string
+	botID        string
+	botReady     chan string        // Канал для уведомления о готовности бота
+	carpinteroCh chan domain.CarpCh // Канал для передачи уведомлений
+	re429        *regexp.Regexp     // Ошибка 429 ТГ лимит отправки сообщений
+	db           DB
+	t            Telega
 }
 
 func NewCarpintero(parent context.Context, botConfig *proto.BotConfigResponse, d DB, t Telega) *Carpintero {
@@ -47,18 +48,19 @@ func NewCarpintero(parent context.Context, botConfig *proto.BotConfigResponse, d
 			botID = token[:idx]
 		}
 	}
-
+	carpCh := make(chan domain.CarpCh, 1)
 	return &Carpintero{
-		ctx:      ctx,
-		cancel:   cancel,
-		botReady: make(chan string),
-		b:        nil,
-		token:    token,
-		botName:  botName,
-		botID:    botID,
-		re429:    regexp.MustCompile(`retry after \d+ \(429\)`),
-		db:       d,
-		t:        t,
+		ctx:          ctx,
+		cancel:       cancel,
+		botReady:     make(chan string),
+		b:            nil,
+		token:        token,
+		botName:      botName,
+		botID:        botID,
+		carpinteroCh: carpCh,
+		re429:        regexp.MustCompile(`retry after \d+ \(429\)`),
+		db:           d,
+		t:            t,
 	}
 }
 
@@ -144,7 +146,7 @@ func (c *Carpintero) Listener() {
 		case <-c.ctx.Done():
 			logger.Info("Carpintero listener stopped due to context cancellation")
 			return
-		case msg, ok := <-domain.CarpinteroCh:
+		case msg, ok := <-c.carpinteroCh:
 			if !ok {
 				logger.Error("CarpinteroCh closed")
 				return

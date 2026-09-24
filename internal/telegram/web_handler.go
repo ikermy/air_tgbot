@@ -128,7 +128,7 @@ func (c *Carpintero) Notification(w http.ResponseWriter, r *http.Request) {
 	}
 
 	select {
-	case domain.CarpinteroCh <- message:
+	case c.carpinteroCh <- message:
 		w.WriteHeader(http.StatusOK)
 		err := json.NewEncoder(w).Encode(map[string]any{})
 		if err != nil {
@@ -172,7 +172,7 @@ func (c *Carpintero) SendAdminNotification(w http.ResponseWriter, r *http.Reques
 	}
 
 	select {
-	case domain.CarpinteroCh <- message:
+	case c.carpinteroCh <- message:
 		w.WriteHeader(http.StatusOK)
 		err := json.NewEncoder(w).Encode(map[string]any{})
 		if err != nil {
