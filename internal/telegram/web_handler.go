@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ikermy/air-common/pkg/endpoint"
+	"github.com/ikermy/air-common/v2/pkg/endpoint"
 	"github.com/ikermy/air-logger/v2/pkg/logger"
 	tele "gopkg.in/telebot.v4"
 )
@@ -261,7 +261,7 @@ func (c *Carpintero) reloadBot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId := uint32(uidUint)
+	userId := uint64(uidUint)
 
 	// канал для результата
 	resultCh := make(chan error, 1)
@@ -365,7 +365,7 @@ func (c *Carpintero) SetWebhook(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(map[string]string{"status": "webhook set successfully"})
 }
 
-func readUserId(w http.ResponseWriter, r *http.Request) (uint32, bool) {
+func readUserId(w http.ResponseWriter, r *http.Request) (uint64, bool) {
 	// Читаем uid из query-параметров: /get-bot-name?uid=123
 	uidStr := r.URL.Query().Get("uid")
 	if uidStr == "" {
@@ -384,5 +384,5 @@ func readUserId(w http.ResponseWriter, r *http.Request) (uint32, bool) {
 		return 0, false
 	}
 
-	return uint32(uid), true
+	return uint64(uid), true
 }

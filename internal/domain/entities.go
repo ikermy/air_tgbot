@@ -1,7 +1,7 @@
 package domain
 
 import (
-	"github.com/ikermy/air-common/pkg/comdom"
+	"github.com/ikermy/air-common/v2/pkg/comdom"
 )
 
 // UserDetails представляет информацию о пользователе, включая настройки телеграм-бота

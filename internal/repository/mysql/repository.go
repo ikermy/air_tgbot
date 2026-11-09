@@ -9,10 +9,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ikermy/air-common/pkg/comdb"
-	"github.com/ikermy/air-common/pkg/comdom"
-	"github.com/ikermy/air-common/pkg/mode"
-	"github.com/ikermy/air-common/pkg/model/create"
+	"github.com/ikermy/air-common/v2/pkg/comdb"
+	"github.com/ikermy/air-common/v2/pkg/comdom"
+	"github.com/ikermy/air-common/v2/pkg/mode"
+	"github.com/ikermy/air-common/v2/pkg/model/create"
 	"github.com/ikermy/air-logger/v2/pkg/logger"
 )
 
@@ -213,7 +213,7 @@ func (r *Implementation) GetTgBotUsers(ctx context.Context) ([]domain.UserDetail
 }
 
 // GetTgBotUser получает данные конкретного пользователя из БД по userId
-func (r *Implementation) GetTgBotUser(ctx context.Context, userId uint32) (*domain.UserDetails, error) {
+func (r *Implementation) GetTgBotUser(ctx context.Context, userId uint64) (*domain.UserDetails, error) {
 	// Дочерний контекст с тайм-аутом на операцию
 	ctxTimeout, cancel := context.WithTimeout(ctx, mode.GetSQLTimeToCancel())
 	defer cancel()

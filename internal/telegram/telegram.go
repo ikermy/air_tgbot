@@ -12,34 +12,34 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ikermy/air-common/pkg/com"
-	"github.com/ikermy/air-common/pkg/comdb"
-	"github.com/ikermy/air-common/pkg/comdom"
-	"github.com/ikermy/air-common/pkg/crm"
-	"github.com/ikermy/air-common/pkg/crypto"
-	"github.com/ikermy/air-common/pkg/endpoint"
-	"github.com/ikermy/air-common/pkg/mode"
-	"github.com/ikermy/air-common/pkg/model"
-	"github.com/ikermy/air-common/pkg/operator"
+	"github.com/ikermy/air-common/v2/pkg/com"
+	"github.com/ikermy/air-common/v2/pkg/comdb"
+	"github.com/ikermy/air-common/v2/pkg/comdom"
+	"github.com/ikermy/air-common/v2/pkg/crm"
+	"github.com/ikermy/air-common/v2/pkg/crypto"
+	"github.com/ikermy/air-common/v2/pkg/endpoint"
+	"github.com/ikermy/air-common/v2/pkg/mode"
+	"github.com/ikermy/air-common/v2/pkg/model"
+	"github.com/ikermy/air-common/v2/pkg/operator"
 	"github.com/ikermy/air-logger/v2/pkg/logger"
 	"github.com/redis/go-redis/v9"
 	tele "gopkg.in/telebot.v4"
 )
 
 type Inter interface {
-	GetBotUsername(userID uint32) string
-	StopUserBot(userID uint32) error
-	RestartUserBot(userID uint32) error
-	StartUserBot(userID uint32) error
+	GetBotUsername(userID uint64) string
+	StopUserBot(userID uint64) error
+	RestartUserBot(userID uint64) error
+	StartUserBot(userID uint64) error
 	ProcessWebhookUpdate(token string, body []byte) error
-	SetWebhookUserBot(userID uint32) error
+	SetWebhookUserBot(userID uint64) error
 }
 
 // IntDB интерфейс внутренних операций с БД специфичных для TgBot
 // Только методы которых нет в comdb.Exterior
 type IntDB interface {
 	GetTgBotUsers(ctx context.Context) ([]domain.UserDetails, error)
-	GetTgBotUser(ctx context.Context, userId uint32) (*domain.UserDetails, error)
+	GetTgBotUser(ctx context.Context, userId uint64) (*domain.UserDetails, error)
 }
 
 type DB interface {
@@ -49,7 +49,7 @@ type DB interface {
 
 // ORCClient интерфейс для получения MasterKey пользователя через Landing gRPC
 type ORCClient interface {
-	GetUserMasterKey(ctx context.Context, userId uint32) ([32]byte, error)
+	GetUserMasterKey(ctx context.Context, userId uint64) ([32]byte, error)
 }
 
 type Model = model.Inter
@@ -89,7 +89,7 @@ type Bot struct {
 	mod              Model
 	end              Endpoint
 	assist           *model.Assistant
-	userId           uint32         // ID пользователя-владельца бота
+	userId uint64         // ID пользователя-владельца бота
 	isTestBot        bool           // Флаг тестового бота (для unit/integration тестов)
 	firstInteraction sync.Map       // Key: respId (int64), value: bool (true если это первое сообщение от респондента)
 	respIdentifiers  sync.Map       // key: respId (int64), value: string (идентификатор респондента для CRM)
@@ -110,14 +110,14 @@ type User struct {
 	crm                  CRM
 	rpc                  ORCClient
 	firstCache           CacheMethods
-	bot                  map[uint32]*Bot
+	bot                  map[uint64]*Bot
 	botByToken           map[string]*Bot // Для быстрого поиска бота по токену в режиме webhook
 	operatorModeByDialog sync.Map        // Key: dialogId (uint64), value: bool
 	op                   Operator
 	deltaProcessor       DeltaProcessor // ProcessStreamDelta из startpoint.Start
 
 	// Колбэк для проброса входящих сообщений в вызывающий слой
-	// onIncoming func(userID uint32, dialogID uint64) error
+	// onIncoming func(userID uint64, dialogID uint64) error
 }
 
 // SetDeltaProcessor внедряет DeltaProcessor (startpoint.Start) для использования
@@ -139,7 +139,7 @@ func New(parent context.Context, d DB, m Model, e Endpoint, c CRM, o ORCClient, 
 		crm:        c,
 		rpc:        o,
 		firstCache: newRedisFirstInteractionCache(redisClient),
-		bot:        make(map[uint32]*Bot),
+		bot:        make(map[uint64]*Bot),
 		botByToken: make(map[string]*Bot),
 	}
 
@@ -239,7 +239,7 @@ func (u *User) GetTgBotUsers() error {
 
 	// Обрабатываем каждого активного пользователя из БД
 	for _, user := range details {
-		userID := uint32(user.UserId)
+		userID := uint64(user.UserId)
 
 		// Пропускаем отключенных ботов
 		if !user.TgBotEnabled || user.TgBot == "" {
@@ -282,7 +282,7 @@ func (u *User) GetTgBotUsers() error {
 }
 
 // StartUserBot запускает бота для конкретного пользователя по userId
-func (u *User) StartUserBot(userID uint32) error {
+func (u *User) StartUserBot(userID uint64) error {
 	metrics.ObserveBotLifecycle(userID, "start", "attempt")
 	// Получаем данные пользователя из БД
 	userDetails, err := u.db.GetTgBotUser(u.ctx, userID)
@@ -340,7 +340,7 @@ func (u *User) StartUserBot(userID uint32) error {
 
 // parseTokenFromJSON расшифровывает (если нужно) и парсит токен из JSON строки.
 // Если значение зашифровано MasterKey ($mk$...), получает ключ через orcClient.
-func (u *User) parseTokenFromJSON(ctx context.Context, tokenJSON string, userID uint32) (string, bool, bool, error) {
+func (u *User) parseTokenFromJSON(ctx context.Context, tokenJSON string, userID uint64) (string, bool, bool, error) {
 	raw := tokenJSON
 
 	// Если поле зашифровано MasterKey — расшифровываем
@@ -406,7 +406,7 @@ func (u *User) parseTokenFromJSON(ctx context.Context, tokenJSON string, userID 
 // Создает модель ассистента
 func (u *User) createAssistantModel(user domain.UserDetails) *model.Assistant {
 	return &model.Assistant{
-		UserID:     uint32(user.UserId),
+		UserID:     uint64(user.UserId),
 		AssistName: user.AssistName,
 		AssistId:   user.AssistantId,
 		Provider:   user.Provider,
@@ -426,7 +426,7 @@ func (u *User) createAssistantModel(user domain.UserDetails) *model.Assistant {
 }
 
 // Проверяет подписку пользователя
-func (u *User) checkUserSubscription(userID uint32) error {
+func (u *User) checkUserSubscription(userID uint64) error {
 	err := com.CheckUserSubscription(u.db, userID)
 	if err != nil {
 		var commonErr *com.SubscriptionError
@@ -443,7 +443,7 @@ func (u *User) checkUserSubscription(userID uint32) error {
 }
 
 // Создает нового бота или обновляет существующего
-func (u *User) createOrUpdateBot(userID uint32, token string, delta, webhook bool, assist *model.Assistant, forceUpdate bool) (*Bot, error) {
+func (u *User) createOrUpdateBot(userID uint64, token string, delta, webhook bool, assist *model.Assistant, forceUpdate bool) (*Bot, error) {
 	// Проверяем, существует ли уже такой бот
 	existingBot, exists := u.bot[userID]
 
@@ -483,7 +483,7 @@ func (u *User) createOrUpdateBot(userID uint32, token string, delta, webhook boo
 }
 
 // Инициализирует нового бота
-func (u *User) initializeBot(userID uint32, token string, delta, webhook bool, assist *model.Assistant) (*Bot, error) {
+func (u *User) initializeBot(userID uint64, token string, delta, webhook bool, assist *model.Assistant) (*Bot, error) {
 	metrics.SetActiveSessions(userID, "starting", 1)
 	metrics.SetActiveSessions(userID, "running", 0)
 	botCtx, botCancel := context.WithCancel(u.ctx)
@@ -1293,7 +1293,7 @@ func (b *Bot) handleDeltaMessage(respId int64, rawChunk string) {
 }
 
 // DisableOperatorMode отключает режим оператора и уведомляет AI-модель
-func (u *User) DisableOperatorMode(userId uint32, dialogId uint64, silent ...bool) error {
+func (u *User) DisableOperatorMode(userId uint64, dialogId uint64, silent ...bool) error {
 	// Определяем значение silent (по умолчанию false)
 	isSilent := false
 	if len(silent) > 0 {
@@ -1647,7 +1647,7 @@ func (b *Bot) telegramFileToFileUpload(c tele.Context, file tele.File, fileName,
 }
 
 // GetBotUsername возвращает имя пользователя бота для отдачи в API
-func (u *User) GetBotUsername(userID uint32) string {
+func (u *User) GetBotUsername(userID uint64) string {
 	u.mu.RLock()
 	bot, ok := u.bot[userID]
 	u.mu.RUnlock()
@@ -1689,7 +1689,7 @@ func (u *User) IsOperatorMode(dialogId uint64) bool {
 }
 
 // StopUserBot останавливает бота пользователя по userID
-func (u *User) StopUserBot(userID uint32) error {
+func (u *User) StopUserBot(userID uint64) error {
 	metrics.ObserveBotLifecycle(userID, "stop", "attempt")
 	u.mu.Lock()
 	defer u.mu.Unlock()
@@ -1723,7 +1723,7 @@ func (u *User) StopUserBot(userID uint32) error {
 }
 
 // RestartUserBot перезапускает бота пользователя с пересозданием модели ассистента
-func (u *User) RestartUserBot(userID uint32) error {
+func (u *User) RestartUserBot(userID uint64) error {
 	metrics.ObserveBotLifecycle(userID, "restart", "attempt")
 	// 1. Проверяем существование бота
 	u.mu.RLock()
@@ -1790,7 +1790,7 @@ func (u *User) ProcessWebhookUpdate(token string, body []byte) error {
 }
 
 // SetWebhookUserBot регистрирует вебхук для бота пользователя в Telegram
-func (u *User) SetWebhookUserBot(userID uint32) error {
+func (u *User) SetWebhookUserBot(userID uint64) error {
 	// Получаем бота
 	u.mu.RLock()
 	bot, ok := u.bot[userID]

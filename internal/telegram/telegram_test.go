@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ikermy/air-common/pkg/comdom"
-	"github.com/ikermy/air-common/pkg/model"
+	"github.com/ikermy/air-common/v2/pkg/comdom"
+	"github.com/ikermy/air-common/v2/pkg/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	tele "gopkg.in/telebot.v4"
@@ -24,17 +24,17 @@ type mockFirstInteractionCache struct {
 	setCalls    []int64
 }
 
-func (m *mockFirstInteractionCache) Has(_ context.Context, _ uint32, senderID int64) (bool, error) {
+func (m *mockFirstInteractionCache) Has(_ context.Context, _ uint64, senderID int64) (bool, error) {
 	_ = senderID
 	return m.hasResult, m.hasErr
 }
 
-func (m *mockFirstInteractionCache) Set(_ context.Context, _ uint32, senderID int64) error {
+func (m *mockFirstInteractionCache) Set(_ context.Context, _ uint64, senderID int64) error {
 	m.setCalls = append(m.setCalls, senderID)
 	return m.setErr
 }
 
-func (m *mockFirstInteractionCache) LoadUser(_ context.Context, _ uint32) ([]int64, error) {
+func (m *mockFirstInteractionCache) LoadUser(_ context.Context, _ uint64) ([]int64, error) {
 	return m.loadUserIDs, m.loadErr
 }
 
@@ -48,7 +48,7 @@ func createMockUser() *User {
 	user := &User{
 		ctx:    ctx,
 		cancel: func() {},
-		bot:    make(map[uint32]*Bot),
+		bot:    make(map[uint64]*Bot),
 	}
 	return user
 }
@@ -445,7 +445,7 @@ func (m *MockDBForTesting) GetTgBotUsers(ctx context.Context) ([]domain.UserDeta
 	return args.Get(0).([]domain.UserDetails), args.Error(1)
 }
 
-func (m *MockDBForTesting) GetTgBotUser(ctx context.Context, userId uint32) (*domain.UserDetails, error) {
+func (m *MockDBForTesting) GetTgBotUser(ctx context.Context, userId uint64) (*domain.UserDetails, error) {
 	args := m.Called(ctx, userId)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -492,7 +492,7 @@ func TestDBMock_GetTgBotUser(t *testing.T) {
 		Provider:     comdom.ProviderMistral,
 	}
 
-	mockDB.On("GetTgBotUser", mock.Anything, uint32(456)).Return(user, nil)
+	mockDB.On("GetTgBotUser", mock.Anything, uint64(456)).Return(user, nil)
 
 	result, err := mockDB.GetTgBotUser(context.Background(), 456)
 
@@ -507,7 +507,7 @@ func TestDBMock_GetTgBotUser(t *testing.T) {
 func TestDBMock_GetTgBotUserNotFound(t *testing.T) {
 	mockDB := new(MockDBForTesting)
 
-	mockDB.On("GetTgBotUser", mock.Anything, uint32(999)).Return(nil, nil)
+	mockDB.On("GetTgBotUser", mock.Anything, uint64(999)).Return(nil, nil)
 
 	result, err := mockDB.GetTgBotUser(context.Background(), 999)
 

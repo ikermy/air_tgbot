@@ -7,7 +7,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/ikermy/air-common/pkg/comdb"
+	"github.com/ikermy/air-common/v2/pkg/comdb"
 	"github.com/ikermy/air-logger/v2/pkg/logger"
 
 	_ "github.com/go-sql-driver/mysql" // регистрация драйвера "mysql" для database/sql
@@ -52,7 +52,7 @@ func (d *DB) GetTgBotUsers(ctx context.Context) ([]domain.UserDetails, error) {
 }
 
 // GetTgBotUser получает данные конкретного пользователя
-func (d *DB) GetTgBotUser(ctx context.Context, userId uint32) (*domain.UserDetails, error) {
+func (d *DB) GetTgBotUser(ctx context.Context, userId uint64) (*domain.UserDetails, error) {
 	return d.repo.Internal.GetTgBotUser(ctx, userId)
 }
 
