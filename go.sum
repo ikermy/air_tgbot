@@ -270,6 +270,8 @@ github.com/ikermy/air-common/v2 v2.0.4 h1:ZoOhH1WoQjh2xUDVH8UNNMYrAW+4GSEW6F68sh
 github.com/ikermy/air-common/v2 v2.0.4/go.mod h1:xRsyQjbUfgxWX1QvMq8HXSo5vk1uuNLoj6/Mmx0nvxo=
 github.com/ikermy/air-logger/v2 v2.1.4 h1:taxE4/8JjmFsP8HW73zHLEIy+JD9HadSelq89x0m0S4=
 github.com/ikermy/air-logger/v2 v2.1.4/go.mod h1:pdGKQevFnHCaNuzPl5K3IkNX7P6/s5YEjq56p+xOZ/Y=
+github.com/ikermy/air-logger/v2 v2.1.5 h1:KNz7SfR3xKGIxy3jzu+43SLOmGj5nsJP2K4osGK/emY=
+github.com/ikermy/air-logger/v2 v2.1.5/go.mod h1:n1nmxORKJCRbUUJA+0X0G39aMo6wdsRXNv9+6dkLXjc=
 github.com/jpillora/backoff v1.0.0/go.mod h1:J/6gKK9jxlEcS3zixgDgUAsiuZ7yrSoa/FX5e0EB2j4=
 github.com/json-iterator/go v1.1.6/go.mod h1:+SdeFBvtyEkXs7REEP0seUULqWtbJapLOCVDaaPEHmU=
 github.com/json-iterator/go v1.1.9/go.mod h1:KdQUCv79m/52Kvf8AW2vK1V8akMuk1QjK/uOdHXbAo4=
